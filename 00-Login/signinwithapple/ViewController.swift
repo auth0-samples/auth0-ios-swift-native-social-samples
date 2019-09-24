@@ -15,7 +15,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var loginProviderStackView: UIStackView!
     
-    @IBOutlet weak var authStatusLabel: UILabel!
+    @IBOutlet weak var authenticatedStackView: UIStackView!
     
     let keychain = A0SimpleKeychain()
     let credentialsManager = CredentialsManager(authentication: Auth0.authentication())
@@ -24,18 +24,22 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        authStatusLabel.isHidden = true
+        authenticatedStackView.isHidden = true
         
         setupProviderLoginView()
         
         renewAuth { credentials, error in
-            guard error == nil, credentials == nil else {
+            guard error == nil, credentials != nil else {
                 return print("Unable to renew auth: \(String(describing: error))")
             }
             
-            self.credentials = credentials
             self.showAuthUI()
         }
+    }
+    
+    @IBAction func logoutButtonTouch(_ sender: Any) {
+        logOut()
+        showAuthUI()
     }
     
     func setupProviderLoginView() {
@@ -85,6 +89,8 @@ class ViewController: UIViewController {
                     guard error == nil, let credentials = credentials else {
                         return callback(nil, error)
                     }
+
+                    self.credentials = credentials
                     
                     callback(credentials, error)
                 }
@@ -100,15 +106,19 @@ class ViewController: UIViewController {
     
     private func showAuthUI() {
         DispatchQueue.main.async {
-            guard self.credentials == nil else {
-                self.authStatusLabel.isHidden = true
-                self.authStatusLabel.text = ""
+            guard self.credentials != nil else {
+                self.authenticatedStackView.isHidden = true
                 return
             }
         
-            self.authStatusLabel.isHidden = false
-            self.authStatusLabel.text = "You are now logged in"
+            self.authenticatedStackView.isHidden = false
         }
+    }
+    
+    private func logOut() {
+        _ = credentialsManager.clear()
+        credentials = nil
+        keychain.deleteEntry(forKey: "userId")
     }
 }
 
@@ -139,6 +149,7 @@ extension ViewController: ASAuthorizationControllerDelegate {
                         print("Auth0 Success: \(credentials)")
                         
                         _ = self.credentialsManager.store(credentials: credentials)
+                        self.credentials = credentials
                         self.keychain.setString(appleIDCredential.user, forKey: "userId")
                         
                         self.showAuthUI()
