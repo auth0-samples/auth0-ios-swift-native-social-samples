@@ -28,6 +28,21 @@ Then open the `signinwithapple.xcworkspace' workspace in XCode 11.
 
 1. You will need to modify the the `Bundle Identifier` to match your own app identifier that has been configured for SIWA in the Apple Developer Portal.
 
+### Add Auth0 configuration
+
+Copy the `Auth0.plist.example` file to a file called `Auth0.plist`, and populate the values with your Auth0 app domain and client ID:
+
+```xml
+<plist version="1.0">
+<dict>
+    <key>Domain</key>
+    <string>{DOMAIN}</string>
+    <key>ClientId</key>
+    <string>{CLIENT_ID}</string>
+</dict>
+</plist>
+```
+
 ## Apple References
 
 - [Adding the Sign In with Apple Flow to Your App](https://developer.apple.com/documentation/authenticationservices/adding_the_sign_in_with_apple_flow_to_your_app)
