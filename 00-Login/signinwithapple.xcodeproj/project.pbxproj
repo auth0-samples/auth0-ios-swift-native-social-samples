@@ -15,7 +15,7 @@
 		5BDA328A22D5DAFC0040307B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5BDA328822D5DAFC0040307B /* Main.storyboard */; };
 		5BDA328C22D5DAFF0040307B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5BDA328B22D5DAFF0040307B /* Assets.xcassets */; };
 		5BDA328F22D5DAFF0040307B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5BDA328D22D5DAFF0040307B /* LaunchScreen.storyboard */; };
-		5BF9E1E023211F5F006777B3 /* Auth0.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5BF9E1DF23211F5F006777B3 /* Auth0.plist */; };
+		6FFDCC1123444E050063C078 /* Auth0.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6FFDCC1023444E050063C078 /* Auth0.plist */; };
 		AACE635223311DBA00C9EC59 /* values.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACE635123311DBA00C9EC59 /* values.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,7 +32,7 @@
 		5BDA329022D5DAFF0040307B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5BDA329622D5ED080040307B /* signinwithapple.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = signinwithapple.entitlements; sourceTree = "<group>"; };
 		5BF9E1DE231FC41F006777B3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
-		5BF9E1DF23211F5F006777B3 /* Auth0.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Auth0.plist; sourceTree = SOURCE_ROOT; };
+		6FFDCC1023444E050063C078 /* Auth0.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Auth0.plist; sourceTree = "<group>"; };
 		AACE635123311DBA00C9EC59 /* values.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = values.swift; sourceTree = "<group>"; };
 		ABC9601637C6E1891F97B7E5 /* Pods-signinwithapple.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-signinwithapple.debug.xcconfig"; path = "Target Support Files/Pods-signinwithapple/Pods-signinwithapple.debug.xcconfig"; sourceTree = "<group>"; };
 		F05C1EF788EBD48541B950E6 /* Pods-signinwithapple.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-signinwithapple.release.xcconfig"; path = "Target Support Files/Pods-signinwithapple/Pods-signinwithapple.release.xcconfig"; sourceTree = "<group>"; };
@@ -81,8 +81,8 @@
 		5BDA328122D5DAFC0040307B /* signinwithapple */ = {
 			isa = PBXGroup;
 			children = (
-				5BF9E1DF23211F5F006777B3 /* Auth0.plist */,
 				5BF9E1DE231FC41F006777B3 /* README.md */,
+				6FFDCC1023444E050063C078 /* Auth0.plist */,
 				5BDA329622D5ED080040307B /* signinwithapple.entitlements */,
 				5BDA328222D5DAFC0040307B /* AppDelegate.swift */,
 				5BDA328422D5DAFC0040307B /* SceneDelegate.swift */,
@@ -168,7 +168,7 @@
 				5BDA328F22D5DAFF0040307B /* LaunchScreen.storyboard in Resources */,
 				5BDA328C22D5DAFF0040307B /* Assets.xcassets in Resources */,
 				5BDA328A22D5DAFC0040307B /* Main.storyboard in Resources */,
-				5BF9E1E023211F5F006777B3 /* Auth0.plist in Resources */,
+				6FFDCC1123444E050063C078 /* Auth0.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
