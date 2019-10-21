@@ -38,8 +38,13 @@ class ViewController: UIViewController {
     }
     
     @IBAction func logoutButtonTouch(_ sender: Any) {
-        logOut()
-        showAuthUI()
+        logOut { error in
+            guard error == nil else {
+                return print("Could not log out: \(error.debugDescription)")
+            }
+            
+            self.showAuthUI()
+        }
     }
     
     func setupProviderLoginView() {
@@ -97,9 +102,10 @@ class ViewController: UIViewController {
                 
             default:
                 self.keychain.deleteEntry(forKey: "userId")
-                _ = self.credentialsManager.clear()
                 
-                callback(nil, error)
+                self.credentialsManager.revoke { _ in
+                    callback(nil, error)
+                }
             }
         }
     }
@@ -115,10 +121,17 @@ class ViewController: UIViewController {
         }
     }
     
-    private func logOut() {
-        _ = credentialsManager.clear()
-        credentials = nil
-        keychain.deleteEntry(forKey: "userId")
+    private func logOut(_ callback: @escaping (Error?) -> Void) {
+        credentialsManager.revoke { error in
+            guard error == nil else {
+                return callback(error)
+            }
+            
+            self.credentials = nil
+            self.keychain.deleteEntry(forKey: "userId")
+            
+            callback(nil)
+        }
     }
 }
 
