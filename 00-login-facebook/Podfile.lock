@@ -1,0 +1,50 @@
+PODS:
+  - Auth0 (1.22.1):
+    - JWTDecode
+    - SimpleKeychain
+  - FacebookCore (0.9.0):
+    - FBSDKCoreKit (~> 5.0)
+  - FacebookLogin (0.9.0):
+    - FacebookCore (~> 0.9.0)
+    - FBSDKCoreKit (~> 5.0)
+    - FBSDKLoginKit (~> 5.0)
+  - FBSDKCoreKit (5.15.1):
+    - FBSDKCoreKit/Basics (= 5.15.1)
+    - FBSDKCoreKit/Core (= 5.15.1)
+  - FBSDKCoreKit/Basics (5.15.1)
+  - FBSDKCoreKit/Core (5.15.1):
+    - FBSDKCoreKit/Basics
+  - FBSDKLoginKit (5.15.1):
+    - FBSDKLoginKit/Login (= 5.15.1)
+  - FBSDKLoginKit/Login (5.15.1):
+    - FBSDKCoreKit (~> 5.0)
+  - JWTDecode (2.4.1)
+  - SimpleKeychain (0.11.0)
+
+DEPENDENCIES:
+  - Auth0
+  - FacebookCore
+  - FacebookLogin
+
+SPEC REPOS:
+  trunk:
+    - Auth0
+    - FacebookCore
+    - FacebookLogin
+    - FBSDKCoreKit
+    - FBSDKLoginKit
+    - JWTDecode
+    - SimpleKeychain
+
+SPEC CHECKSUMS:
+  Auth0: c3dd0b6f9031e9cc38be2a6973f766f33ccbad83
+  FacebookCore: ba86524b66cfa86d0f8e65d08faa8504a9f732dd
+  FacebookLogin: 6cee9fd6e1fe976fe8f7eec199e27b28b14f5d63
+  FBSDKCoreKit: 1d5acf7c9d7a2f92bb1a242dc60cae5b7adb91df
+  FBSDKLoginKit: f1ea8026a58b52d30c9f2e6a58ca7d813619fb83
+  JWTDecode: 4bd4da0cdf0f8154fd467fa48499f34ec057fb88
+  SimpleKeychain: 2c135c65e64cd4e7df7ec418407be83ee07ba1c2
+
+PODFILE CHECKSUM: c2a423a90d14857200c5be0f5144f9e665012762
+
+COCOAPODS: 1.9.1
