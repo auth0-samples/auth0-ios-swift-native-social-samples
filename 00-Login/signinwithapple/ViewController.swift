@@ -56,6 +56,10 @@ class ViewController: UIViewController {
         
         //Add button to the UIStackView
         self.loginProviderStackView.addArrangedSubview(authorizationButton)
+        
+        authorizationButton.translatesAutoresizingMaskIntoConstraints = false
+        authorizationButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        authorizationButton.widthAnchor.constraint(equalToConstant: 140).isActive = true
     }
     
     @objc

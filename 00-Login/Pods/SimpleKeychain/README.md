@@ -1,6 +1,7 @@
 # SimpleKeychain
 
-[![CircleCI](https://circleci.com/gh/auth0/SimpleKeychain.svg?style=shield)](https://circleci.com/gh/auth0/SimpleKeychain)
+[![CircleCI](https://img.shields.io/circleci/project/github/auth0/SimpleKeychain.svg?style=flat-square)](https://circleci.com/gh/auth0/SimpleKeychain/tree/master)
+[![Coverage Status](https://img.shields.io/codecov/c/github/auth0/SimpleKeychain/master.svg?style=flat-square)](https://codecov.io/github/auth0/SimpleKeychain)
 [![Version](https://img.shields.io/cocoapods/v/SimpleKeychain.svg?style=flat-square)](https://cocoapods.org/pods/SimpleKeychain)
 [![License](https://img.shields.io/cocoapods/l/SimpleKeychain.svg?style=flat-square)](https://cocoapods.org/pods/SimpleKeychain)
 [![Platform](https://img.shields.io/cocoapods/p/SimpleKeychain.svg?style=flat-square)](https://cocoapods.org/pods/SimpleKeychain)
@@ -32,6 +33,10 @@ it, simply add the following line to your Podfile:
 pod "SimpleKeychain"
 ```
 
+Then, run `pod install`.
+
+> For more information on Cocoapods, check [their official documentation](http://guides.cocoapods.org/using/getting-started.html).
+
 ### Carthage
 
 In your Cartfile add
@@ -39,6 +44,26 @@ In your Cartfile add
 ```ruby
 github "auth0/SimpleKeychain"
 ```
+
+Then run `carthage bootstrap`.
+
+> For more information about Carthage usage, check [their official documentation](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos).
+
+#### SPM (Xcode 11.2+)
+
+If you are using the Swift Package Manager, open the following menu item in Xcode:
+
+**File > Swift Packages > Add Package Dependency...**
+
+In the **Choose Package Repository** prompt add this url: 
+
+```
+https://github.com/auth0/SimpleKeychain.git
+```
+
+Then, press **Next** and complete the remaining steps.
+
+> For more information on SPM, check [its official documentation](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
 
 ## Before Getting Started
 

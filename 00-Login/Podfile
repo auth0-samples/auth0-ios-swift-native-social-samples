@@ -6,6 +6,6 @@ target 'signinwithapple' do
   use_frameworks!
 
   # Pods for signinwithapple
-  pod 'Auth0', '~> 1.19'
+  pod 'Auth0', '~> 1.22'
   
 end

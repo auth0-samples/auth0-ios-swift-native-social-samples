@@ -22,6 +22,7 @@
 
 import Foundation
 import SimpleKeychain
+import JWTDecode
 #if os(iOS)
 import LocalAuthentication
 #endif
@@ -123,14 +124,13 @@ public struct CredentialsManager {
         guard
             let data = self.storage.data(forKey: self.storeKey),
             let credentials = NSKeyedUnarchiver.unarchiveObject(with: data) as? Credentials,
-            credentials.accessToken != nil,
-            let expiresIn = credentials.expiresIn
+            credentials.accessToken != nil
             else { return false }
-        return expiresIn > Date() || credentials.refreshToken != nil
+        return !self.hasExpired(credentials) || credentials.refreshToken != nil
     }
 
     /// Retrieve credentials from keychain and yield new credentials using refreshToken if accessToken has expired
-    /// otherwise the retrieved credentails will be returned as they have not expired. Renewed credentials will be 
+    /// otherwise the retrieved credentails will be returned as they have not expired. Renewed credentials will be
     /// stored in the keychain.
     ///
     ///
@@ -173,8 +173,8 @@ public struct CredentialsManager {
             let data = self.storage.data(forKey: self.storeKey),
             let credentials = NSKeyedUnarchiver.unarchiveObject(with: data) as? Credentials
             else { return callback(.noCredentials, nil) }
-        guard let expiresIn = credentials.expiresIn else { return callback(.noCredentials, nil) }
-        guard expiresIn < Date() else { return callback(nil, credentials) }
+        guard credentials.expiresIn != nil else { return callback(.noCredentials, nil) }
+        guard self.hasExpired(credentials) else { return callback(nil, credentials) }
         guard let refreshToken = credentials.refreshToken else { return callback(.noRefreshToken, nil) }
 
         self.authentication.renew(withRefreshToken: refreshToken, scope: scope).start {
@@ -192,5 +192,17 @@ public struct CredentialsManager {
                 callback(.failedRefresh(error), nil)
             }
         }
+    }
+
+    func hasExpired(_ credentials: Credentials) -> Bool {
+        if let expiresIn = credentials.expiresIn {
+            if expiresIn < Date() { return true }
+        }
+
+        if let token = credentials.idToken, let jwt = try? decode(jwt: token) {
+            return jwt.expired
+        }
+
+        return false
     }
 }

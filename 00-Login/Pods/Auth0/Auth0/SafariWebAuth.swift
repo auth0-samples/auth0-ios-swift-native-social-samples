@@ -41,6 +41,19 @@ class SafariWebAuth: WebAuth {
     var universalLink = false
     var responseType: [ResponseType] = [.code]
     var nonce: String?
+    var leeway: Int = 60 * 1000 // Default leeway is 60 seconds
+    var maxAge: Int?
+
+    lazy var redirectURL: URL? = {
+        let bundleIdentifier = Bundle.main.bundleIdentifier ?? SafariWebAuth.NoBundleIdentifier
+        var components = URLComponents(url: self.url, resolvingAgainstBaseURL: true)
+        components?.scheme = self.universalLink ? "https" : bundleIdentifier
+        return components?.url?
+            .appendingPathComponent("ios")
+            .appendingPathComponent(bundleIdentifier)
+            .appendingPathComponent("callback")
+    }()
+
     private var authenticationSession = true
     private var safariPresentationStyle = UIModalPresentationStyle.fullScreen
 
@@ -91,6 +104,11 @@ class SafariWebAuth: WebAuth {
         return self
     }
 
+    func redirectURL(_ redirectURL: URL) -> Self {
+        self.redirectURL = redirectURL
+        return self
+    }
+
     func nonce(_ nonce: String) -> Self {
         self.nonce = nonce
         return self
@@ -111,11 +129,19 @@ class SafariWebAuth: WebAuth {
         return self
     }
 
+    func leeway(_ leeway: Int) -> Self {
+        self.leeway = leeway
+        return self
+    }
+
+    func maxAge(_ maxAge: Int) -> Self {
+        self.maxAge = maxAge
+        return self
+    }
+
     func start(_ callback: @escaping (Result<Credentials>) -> Void) {
-        guard
-            let redirectURL = self.redirectURL, !redirectURL.absoluteString.hasPrefix(SafariWebAuth.NoBundleIdentifier)
-            else {
-                return callback(Result.failure(error: WebAuthError.noBundleIdentifierFound))
+        guard let redirectURL = self.redirectURL else {
+            return callback(Result.failure(error: WebAuthError.noBundleIdentifierFound))
         }
         if self.responseType.contains(.idToken) {
             guard self.nonce != nil else { return callback(Result.failure(error: WebAuthError.noNonceProvided)) }
@@ -124,7 +150,6 @@ class SafariWebAuth: WebAuth {
         let state = self.parameters["state"] ?? generateDefaultState()
         let authorizeURL = self.buildAuthorizeURL(withRedirectURL: redirectURL, defaults: handler.defaults, state: state)
 
-        #if swift(>=3.2)
         if #available(iOS 11.0, *), self.authenticationSession {
             let session = SafariAuthenticationSession(authorizeURL: authorizeURL, redirectURL: redirectURL, state: state, handler: handler, finish: callback, logger: logger)
             logger?.trace(url: authorizeURL, source: "SafariAuthenticationSession")
@@ -137,35 +162,26 @@ class SafariWebAuth: WebAuth {
             logger?.trace(url: authorizeURL, source: "Safari")
             self.storage.store(session)
         }
-        #else
-            let (controller, finish) = newSafari(authorizeURL, callback: callback)
-            let session = SafariSession(controller: controller, redirectURL: redirectURL, state: state, handler: handler, finish: finish, logger: self.logger)
-            controller.delegate = session
-            self.presenter.present(controller: controller)
-            logger?.trace(url: authorizeURL, source: "Safari")
-            self.storage.store(session)
-        #endif
     }
 
     func newSafari(_ authorizeURL: URL, callback: @escaping (Result<Credentials>) -> Void) -> (SFSafariViewController, (Result<Credentials>) -> Void) {
         let controller = SFSafariViewController(url: authorizeURL)
         controller.modalPresentationStyle = safariPresentationStyle
-        
+
         if #available(iOS 11.0, *) {
             controller.dismissButtonStyle = .cancel
         }
-        
-        let finish: (Result<Credentials>) -> Void = { [weak controller] (result: Result<Credentials>) -> Void in
-            guard let presenting = controller?.presentingViewController else {
-                return callback(Result.failure(error: WebAuthError.cannotDismissWebAuthController))
-            }
 
+        let finish: (Result<Credentials>) -> Void = { [weak controller] (result: Result<Credentials>) -> Void in
             if case .failure(let cause as WebAuthError) = result, case .userCancelled = cause {
                 DispatchQueue.main.async {
                     callback(result)
                 }
             } else {
                 DispatchQueue.main.async {
+                    guard let presenting = controller?.presentingViewController else {
+                        return callback(Result.failure(error: WebAuthError.cannotDismissWebAuthController))
+                    }
                     presenting.dismiss(animated: true) {
                         callback(result)
                     }
@@ -187,7 +203,11 @@ class SafariWebAuth: WebAuth {
         entries["response_type"] = self.responseType.map { $0.label! }.joined(separator: " ")
         if self.responseType.contains(.idToken) {
             entries["nonce"] = self.nonce
+            if let maxAge = self.maxAge {
+                entries["max_age"] = String(maxAge)
+            }
         }
+
         self.parameters.forEach { entries[$0] = $1 }
 
         entries.forEach { items.append(URLQueryItem(name: $0, value: $1)) }
@@ -197,28 +217,25 @@ class SafariWebAuth: WebAuth {
     }
 
     func handler(_ redirectURL: URL) -> OAuth2Grant {
-        if self.responseType.contains([.code]) {
-            var authentication = Auth0Authentication(clientId: self.clientId, url: self.url, telemetry: self.telemetry)
+        var authentication = Auth0Authentication(clientId: self.clientId, url: self.url, telemetry: self.telemetry)
+        if self.responseType.contains([.code]) { // both Hybrid and Code flow
             authentication.logger = self.logger
-            return PKCE(authentication: authentication, redirectURL: redirectURL, reponseType: self.responseType, nonce: self.nonce)
-        } else {
-            return ImplicitGrant(responseType: self.responseType, nonce: self.nonce)
+            return PKCE(authentication: authentication,
+                        redirectURL: redirectURL,
+                        responseType: self.responseType,
+                        leeway: self.leeway,
+                        maxAge: self.maxAge,
+                        nonce: self.nonce)
         }
-    }
-
-    var redirectURL: URL? {
-        let bundleIdentifier = Bundle.main.bundleIdentifier ?? SafariWebAuth.NoBundleIdentifier
-        var components = URLComponents(url: self.url, resolvingAgainstBaseURL: true)
-        components?.scheme = self.universalLink ? "https" : bundleIdentifier
-        return components?.url?
-            .appendingPathComponent("ios")
-            .appendingPathComponent(bundleIdentifier)
-            .appendingPathComponent("callback")
+        return ImplicitGrant(authentication: authentication,
+                             responseType: self.responseType,
+                             leeway: self.leeway,
+                             maxAge: self.maxAge,
+                             nonce: self.nonce)
     }
 
     func clearSession(federated: Bool, callback: @escaping (Bool) -> Void) {
         let logoutURL = federated ? URL(string: "/v2/logout?federated", relativeTo: self.url)! : URL(string: "/v2/logout", relativeTo: self.url)!
-        #if swift(>=3.2)
         if #available(iOS 11.0, *), self.authenticationSession {
             let returnTo = URLQueryItem(name: "returnTo", value: self.redirectURL?.absoluteString)
             let clientId = URLQueryItem(name: "client_id", value: self.clientId)
@@ -235,11 +252,6 @@ class SafariWebAuth: WebAuth {
             logger?.trace(url: logoutURL, source: "Safari")
             self.presenter.present(controller: controller)
         }
-        #else
-            let controller = SilentSafariViewController(url: logoutURL) { callback($0) }
-            logger?.trace(url: logoutURL, source: "Safari")
-            self.presenter.present(controller: controller)
-        #endif
     }
 }
 
