@@ -1,4 +1,0 @@
-${PODS_ROOT}/Target Support Files/Pods-signinwithapple/Pods-signinwithapple-frameworks.sh
-${BUILT_PRODUCTS_DIR}/Auth0/Auth0.framework
-${BUILT_PRODUCTS_DIR}/JWTDecode/JWTDecode.framework
-${BUILT_PRODUCTS_DIR}/SimpleKeychain/SimpleKeychain.framework
