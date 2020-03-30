@@ -21,7 +21,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fb2668587536695558</string>
+				<string>fb{FACEBOOK-APP-ID}</string>
 			</array>
 		</dict>
 	</array>
@@ -30,7 +30,7 @@
 	<key>FacebookAdvertiserIDCollectionEnabled</key>
 	<false/>
 	<key>FacebookAppID</key>
-	<string>2668587536695558</string>
+	<string>{FACEBOOK-APP-ID}</string>
 	<key>FacebookAutoLogAppEventsEnabled</key>
 	<false/>
 	<key>FacebookDisplayName</key>
