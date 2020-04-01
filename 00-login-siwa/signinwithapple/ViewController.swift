@@ -149,18 +149,16 @@ extension ViewController: ASAuthorizationControllerDelegate {
     
     // Handle authorization success
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             // Convert Data -> String
-            guard let authorizationCode = appleIDCredential.authorizationCode, let authCode = String(data: authorizationCode, encoding: .utf8) else
-            {
-                print("Problem with the authorizationCode")
-                return
+            guard let authorizationCode = appleIDCredential.authorizationCode,
+                let authCode = String(data: authorizationCode, encoding: .utf8) else {
+                    return print("Problem with the authorizationCode")
             }
             
             Auth0
                 .authentication()
-                .tokenExchange(withAppleAuthorizationCode: authCode).start { result in
+                .login(appleAuthorizationCode: authCode, fullName: appleIDCredential.fullName).start { result in
                     switch(result) {
                     case .success(let credentials):
                         print("Auth0 Success: \(credentials)")
@@ -170,7 +168,6 @@ extension ViewController: ASAuthorizationControllerDelegate {
                         self.keychain.setString(appleIDCredential.user, forKey: "userId")
                         
                         self.showAuthUI()
-                    
                     case .failure(let error):
                         print("Exchange Failed: \(error)")
                     }
@@ -182,4 +179,5 @@ extension ViewController: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         print("SIWA Authorization Failed: \(error)")
     }
+
 }
