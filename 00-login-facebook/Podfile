@@ -6,8 +6,8 @@ target 'Facebook' do
   use_frameworks!
 
   # Pods for Facebook
-  pod 'Auth0'
-  pod 'FacebookCore'  
-  pod 'FacebookLogin'
+  pod 'Auth0', '~> 1.0'
+  pod 'FacebookCore', '~> 0.9'
+  pod 'FacebookLogin', '~> 0.9'
 
 end
