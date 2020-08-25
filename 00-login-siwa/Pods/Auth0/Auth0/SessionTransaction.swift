@@ -1,6 +1,6 @@
-// SafariSession.swift
+// SessionTransaction.swift
 //
-// Copyright (c) 2016 Auth0 (http://auth0.com)
+// Copyright (c) 2020 Auth0 (http://auth0.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import SafariServices
+class SessionTransaction: BaseAuthTransaction {
 
-final class SafariSession: BaseAuthTransaction {
+    var authSession: AuthSession?
 
-    typealias FinishSession = (Result<Credentials>) -> Void
-
-    weak var controller: UIViewController?
-
-    init(controller: SFSafariViewController,
-         redirectURL: URL,
-         state: String? = nil,
-         handler: OAuth2Grant,
-         logger: Logger?,
-         callback: @escaping FinishSession) {
-        self.controller = controller
-        super.init(redirectURL: redirectURL,
-                   state: state,
-                   handler: handler,
-                   logger: logger,
-                   callback: callback)
-        controller.delegate = self
+    override func cancel() {
+        super.cancel()
+        authSession?.cancel()
+        authSession = nil
     }
 
-}
-
-extension SafariSession: SFSafariViewControllerDelegate {
-
-    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
-        TransactionStore.shared.cancel(self)
+    override func handleUrl(_ url: URL) -> Bool {
+        if super.handleUrl(url) {
+            authSession?.cancel()
+            authSession = nil
+            return true
+        }
+        return false
     }
 
 }

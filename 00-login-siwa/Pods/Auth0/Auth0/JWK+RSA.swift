@@ -31,7 +31,7 @@ extension JWK {
             let modulus = rsaModulus?.a0_decodeBase64URLSafe(),
             let exponent = rsaExponent?.a0_decodeBase64URLSafe() else { return nil }
         let encodedKey = encodeRSAPublicKey(modulus: [UInt8](modulus), exponent: [UInt8](exponent))
-        if #available(iOS 10, *) {
+        if #available(iOS 10.0, macOS 10.12, *) {
             return generateRSAPublicKey(from: encodedKey)
         }
         let tag = "com.auth0.tmp.RSAPublicKey"
@@ -41,20 +41,21 @@ extension JWK {
     }
 
     private func encodeRSAPublicKey(modulus: [UInt8], exponent: [UInt8]) -> Data {
-        let encodedModulus = modulus.a0_derEncode(as: 2) // Integer
+        var prefixedModulus: [UInt8] = [0x00] // To indicate that the number is not negative
+        prefixedModulus.append(contentsOf: modulus)
+        let encodedModulus = prefixedModulus.a0_derEncode(as: 2) // Integer
         let encodedExponent = exponent.a0_derEncode(as: 2) // Integer
         let encodedSequence = (encodedModulus + encodedExponent).a0_derEncode(as: 48) // Sequence
         return Data(encodedSequence)
     }
 
-    @available(iOS 10, *)
+    @available(iOS 10.0, macOS 10.12, *)
     private func generateRSAPublicKey(from derEncodedData: Data) -> SecKey? {
         let sizeInBits = derEncodedData.count * MemoryLayout<UInt8>.size
-        let attributes: [CFString: Any] = [kSecClass: kSecClassKey,
-                                           kSecAttrKeyType: kSecAttrKeyTypeRSA,
+        let attributes: [CFString: Any] = [kSecAttrKeyType: kSecAttrKeyTypeRSA,
                                            kSecAttrKeyClass: kSecAttrKeyClassPublic,
-                                           kSecAttrAccessible: kSecAttrAccessibleAlways,
-                                           kSecAttrKeySizeInBits: NSNumber(value: sizeInBits)]
+                                           kSecAttrKeySizeInBits: NSNumber(value: sizeInBits),
+                                           kSecAttrIsPermanent: false]
         return SecKeyCreateWithData(derEncodedData as CFData, attributes as CFDictionary, nil)
     }
 }

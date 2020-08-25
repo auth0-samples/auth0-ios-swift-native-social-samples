@@ -5,8 +5,7 @@
 [![Version](https://img.shields.io/cocoapods/v/Auth0.svg?style=flat-square)](https://cocoadocs.org/docsets/Auth0)
 [![License](https://img.shields.io/cocoapods/l/Auth0.svg?style=flat-square)](https://cocoadocs.org/docsets/Auth0)
 [![Platform](https://img.shields.io/cocoapods/p/Auth0.svg?style=flat-square)](https://cocoadocs.org/docsets/Auth0)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat-square)](https://github.com/Carthage/Carthage)
-![Swift 5.0](https://img.shields.io/badge/Swift-5.0-orange.svg?style=flat-square)
+![Swift 5.2](https://img.shields.io/badge/Swift-5.2-orange.svg?style=flat-square)
 
 Swift toolkit that lets you communicate efficiently with many of the [Auth0 API](https://auth0.com/docs/api/info) functions and enables you to seamlessly integrate the Auth0 login.
 
@@ -28,8 +27,8 @@ Swift toolkit that lets you communicate efficiently with many of the [Auth0 API]
 ## Requirements
 
 - iOS 9+ / macOS 10.11+ / tvOS 9.0+ / watchOS 2.0+
-- Xcode 10.x/11.x
-- Swift 4.x/5.x
+- Xcode 10.x / 11.x
+- Swift 4.x / 5.x
 
 
 ## Installation
@@ -39,10 +38,10 @@ Swift toolkit that lets you communicate efficiently with many of the [Auth0 API]
 If you are using [Cocoapods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'Auth0', '~> 1.22'
+pod 'Auth0', '~> 1.28'
 ```
 
-Then, run `pod install`.
+Then run `pod install`.
 
 > For more information on Cocoapods, check [their official documentation](https://guides.cocoapods.org/using/getting-started.html).
 
@@ -51,10 +50,10 @@ Then, run `pod install`.
 If you are using [Carthage](https://github.com/Carthage/Carthage), add the following line to your `Cartfile`:
 
 ```ruby
-github "auth0/Auth0.swift" ~> 1.22
+github "auth0/Auth0.swift" ~> 1.28
 ```
 
-Then, run `carthage bootstrap`.
+Then run `carthage bootstrap`.
 
 > For more information about Carthage usage, check [their official documentation](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos).
 
@@ -63,7 +62,7 @@ Then, run `carthage bootstrap`.
 
 ## Getting Started
 
-### Authentication with Universal Login (iOS Only)
+### Authentication with Universal Login (iOS / macOS 10.15+)
 
 1. Import **Auth0** into your project.        
 ```swift
@@ -87,10 +86,21 @@ Auth0
 
 > This snippet sets the `audience` to ensure OIDC compliant responses, this can also be achieved by enabling the **OIDC Conformant** switch in your Auth0 dashboard under `Application / Settings / Advanced / OAuth`. For more information please check the [OIDC Conformant Authentication Adoption Guide](https://auth0.com/docs/api-auth/tutorials/adoption).
 
-3. Allow Auth0 to handle authentication callbacks. In your `AppDelegate.swift` add the following:
+3. Allow Auth0 to handle authentication callbacks. In your `AppDelegate.swift`, add the following:
+
+#### iOS
+
 ```swift
-func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any]) -> Bool {
-    return Auth0.resumeAuth(url, options: options)
+func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
+    return Auth0.resumeAuth(url)
+}
+```
+
+#### macOS
+
+```swift
+func application(_ application: NSApplication, open urls: [URL]) {
+    Auth0.resumeAuth(urls)
 }
 ```
 
@@ -117,11 +127,11 @@ In your application bundle add a `plist` file named `Auth0.plist` with the follo
 </plist>
 ```
 
-#### Configure Callback URLs (iOS Only)
+#### Configure Callback URLs (iOS / macOS)
 
 Callback URLs are the URLs that Auth0 invokes after the authentication process. Auth0 routes your application back to this URL and appends additional parameters to it, including a token. Since callback URLs can be manipulated, you will need to add your callback URL to the **Allowed Callback URLs** field in the [Auth0 Dashboard](https://manage.auth0.com/#/applications/). This will enable Auth0 to recognize these URLs as valid. If omitted, authentication will not be successful.
 
-In your application's `Info.plist` file, register your iOS Bundle Identifer as a custom scheme:
+In your application's `Info.plist` file, register your iOS / macOS Bundle Identifer as a custom scheme:
 
 ```xml
 <!-- Info.plist -->
@@ -149,7 +159,7 @@ Finally, go to your [Auth0 Dashboard](https://manage.auth0.com/#/applications/) 
 YOUR_BUNDLE_IDENTIFIER://YOUR_AUTH0_DOMAIN/ios/YOUR_BUNDLE_IDENTIFIER/callback
 ```
 
-e.g. If your bundle identifier was `com.company.myapp` and your Auth0 domain was `company.auth0.com` then this value would be
+e.g. If your bundle identifier was `com.company.myapp` and your Auth0 domain was `company.auth0.com`, then this value would be:
 
 ```text
 com.company.myapp://company.auth0.com/ios/com.company.myapp/callback
@@ -188,7 +198,7 @@ Auth0
     .authentication()
     .renew(withRefreshToken: refreshToken)
     .start { result in
-        switch(result) {
+        switch result {
         case .success(let credentials):
             print("Obtained new credentials: \(credentials)")
         case .failure(let error):
@@ -197,7 +207,26 @@ Auth0
     }
 ```
 
-### Credentials Management Utility (iOS Only)
+#### Disable Single Sign On (iOS 13+ / macOS)
+
+Add the `useEphemeralSession()` method to the chain to disable SSO on iOS 13+ and macOS. This way the system will not display the consent popup that otherwise shows up when SSO is enabled. It has no effect on older versions of iOS.
+
+```swift
+Auth0
+    .webAuth()
+    .audience("https://{YOUR_AUTH0_DOMAIN}/userinfo")
+    .useEphemeralSession()
+    .start { result in
+        switch result {
+        case .success(let credentials):
+            print("Obtained credentials: \(credentials)")
+        case .failure(let error):
+            print("Failed with \(error)")
+        }
+    }
+```
+
+### Credentials Management Utility (iOS / macOS / tvOS)
 
 The credentials manager utility provides a convenience to securely store and retrieve the user's credentials from the Keychain.
 
@@ -207,7 +236,7 @@ let credentialsManager = CredentialsManager(authentication: Auth0.authentication
 
 #### Store Credentials
 
-Store user credentials securely in the KeyChain.
+Store user credentials securely in the Keychain.
 
 ```swift
 credentialsManager.store(credentials: credentials)
@@ -228,13 +257,13 @@ credentialsManager.credentials { error, credentials in
 
 #### Clearing credentials and revoking refresh tokens
 
-Credentials can be cleared by using the `clear` function, which clears credentials from the keychain:
+Credentials can be cleared by using the `clear` function, which clears credentials from the Keychain:
 
 ```swift
 let didClear = credentialsManager.clear()
 ```
 
-In addition, credentials can be cleared and the refresh token revoked using a single call to `revoke`. This function will attempt to revoke the current refresh token stored by the credential manager and then clear credentials from the keychain. If revoking the token results in an error, then the credentials are not cleared:
+In addition, credentials can be cleared and the refresh token revoked using a single call to `revoke`. This function will attempt to revoke the current refresh token stored by the credential manager and then clear credentials from the Keychain. If revoking the token results in an error, then the credentials are not cleared:
 
 ```swift
 credentialsManager.revoke { error in
@@ -258,7 +287,7 @@ credentialsManager.enableBiometrics(withTitle: "Touch to Login")
 
 #### Sign in With Apple
 
-If you've added [the Sign In with Apple flow](https://developer.apple.com/documentation/authenticationservices/implementing_user_authentication_with_sign_in_with_apple) to your app, you can use the string value from the  `authorizationCode` property obtained after a successful Apple authentication to perform a token exchange for Auth0 tokens.
+If you've added [the Sign In with Apple flow](https://developer.apple.com/documentation/authenticationservices/implementing_user_authentication_with_sign_in_with_apple) to your app, you can use the string value from the `authorizationCode` property obtained after a successful Apple authentication to perform a token exchange for Auth0 tokens.
 
 ```swift
 Auth0
@@ -314,7 +343,7 @@ Auth0
         usernameOrEmail: "support@auth0.com",
         password: "secret-password",
         realm: "Username-Password-Authentication",
-        scope: "openid")
+        scope: "openid profile")
      .start { result in
          switch result {
          case .success(let credentials):
@@ -327,7 +356,7 @@ Auth0
 
 > This requires `Password` Grant or `http://auth0.com/oauth/grant-type/password-realm`.
 
-#### Sign Up with database connection
+#### Sign up with database connection
 
 ```swift
 Auth0
@@ -337,8 +366,7 @@ Auth0
         password: "secret-password",
         connection: "Username-Password-Authentication",
         userMetadata: ["first_name": "First",
-                       "last_name": "Last"]
-    )
+                       "last_name": "Last"])
     .start { result in
         switch result {
         case .success(let user):
@@ -348,13 +376,6 @@ Auth0
         }
     }
 ```
-
-### Custom Domains
-
-If you are using the [Custom Domains](https://auth0.com/docs/custom-domains) feature and need to use an Auth0 endpoint
-such as `/userinfo`, please use the Auth0 domain specified for your Application in the [Auth0 Dashboard](https://manage.auth0.com/#/applications/).
-
-Example:  `.audience("https://{YOUR_AUTH0_DOMAIN}/userinfo")`
 
 ### Management API (Users)
 
@@ -377,6 +398,66 @@ Auth0
         }
     }
 ```
+
+### Custom Domains
+
+If you are using [Custom Domains](https://auth0.com/docs/custom-domains) and need to call an Auth0 endpoint
+such as `/userinfo`, please use the Auth0 domain specified for your Application in the [Auth0 Dashboard](https://manage.auth0.com/#/applications/).
+
+Example: `.audience("https://{YOUR_AUTH0_DOMAIN}/userinfo")`
+
+Users of Auth0 Private Cloud with Custom Domains still on the [legacy behavior](https://auth0.com/docs/private-cloud/private-cloud-migrations/migrate-private-cloud-custom-domains#background) need to specify a custom issuer to match the Auth0 domain before starting the authentication. Otherwise, the ID Token validation will fail.
+
+Example: `.issuer("https://{YOUR_AUTH0_DOMAIN}/")`
+
+### Bot Protection
+
+If you are using the [Bot Protection](https://auth0.com/docs/anomaly-detection/bot-protection) feature and performing database login/signup via the Authentication API, you need to handle the `isVerificationRequired` error. It indicates that the request was flagged as suspicious and an additional verification step is necessary to log the user in. That verification step is web-based, so you need to use Universal Login to complete it.
+
+```swift
+let email = "support@auth0.com"
+let realm = "Username-Password-Authentication"
+let scope = "openid profile"
+
+Auth0
+    .authentication()
+    .login(
+        usernameOrEmail: email,
+        password: "secret-password",
+        realm: realm,
+        scope: scope)
+     .start { result in
+         switch result {
+         case .success(let credentials):
+            print("Obtained credentials: \(credentials)")
+         case .failure(let error as AuthenticationError) where error.isVerificationRequired:
+            DispatchQueue.main.async {
+                Auth0
+                    .webAuth()
+                    .connection(realm)
+                    .scope(scope)
+                    .parameters(["login_hint": email])
+                    // ☝🏼 So the user doesn't have to type it again
+                    .start { result in
+                        // Handle result
+                    }
+            }
+         case .failure(let error):
+            print("Failed with \(error)")
+         }
+     }
+```
+
+In the case of signup, you can add [an additional parameter](https://auth0.com/docs/universal-login/new-experience#signup) to make the user land directly on the signup page:
+
+```swift
+.parameters(["login_hint": email,
+             "screen_hint": "signup"])
+```
+
+Check out how to set up Universal Login in the [Getting Started](#getting-started) section.
+
+> You don't need to handle this error if you're using the deprecated login methods.
 
 ### Logging
 
