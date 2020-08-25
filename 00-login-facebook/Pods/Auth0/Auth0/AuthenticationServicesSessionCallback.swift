@@ -1,6 +1,6 @@
-// SafariSession.swift
+// AuthenticationServicesSessionCallback.swift
 //
-// Copyright (c) 2016 Auth0 (http://auth0.com)
+// Copyright (c) 2020 Auth0 (http://auth0.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import SafariServices
+#if canImport(AuthenticationServices)
+import AuthenticationServices
 
-final class SafariSession: BaseAuthTransaction {
+@available(iOS 12.0, macOS 10.15, *)
+final class AuthenticationServicesSessionCallback: SessionCallbackTransaction {
 
-    typealias FinishSession = (Result<Credentials>) -> Void
+    init(url: URL, schemeURL: URL, callback: @escaping (Bool) -> Void) {
+        super.init(callback: callback)
 
-    weak var controller: UIViewController?
+        let authSession = ASWebAuthenticationSession(url: url,
+                                                     callbackURLScheme: schemeURL.scheme) { [weak self] url, _ in
+            self?.callback(url != nil)
+            TransactionStore.shared.clear()
+        }
 
-    init(controller: SFSafariViewController,
-         redirectURL: URL,
-         state: String? = nil,
-         handler: OAuth2Grant,
-         logger: Logger?,
-         callback: @escaping FinishSession) {
-        self.controller = controller
-        super.init(redirectURL: redirectURL,
-                   state: state,
-                   handler: handler,
-                   logger: logger,
-                   callback: callback)
-        controller.delegate = self
+        #if swift(>=5.1)
+        if #available(iOS 13.0, *) {
+            authSession.presentationContextProvider = self
+        }
+        #endif
+
+        self.authSession = authSession
+        authSession.start()
     }
 
 }
-
-extension SafariSession: SFSafariViewControllerDelegate {
-
-    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
-        TransactionStore.shared.cancel(self)
-    }
-
-}
+#endif
