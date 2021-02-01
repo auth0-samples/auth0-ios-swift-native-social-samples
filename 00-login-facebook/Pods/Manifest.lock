@@ -1,5 +1,5 @@
 PODS:
-  - Auth0 (1.30.0):
+  - Auth0 (1.30.1):
     - JWTDecode
     - SimpleKeychain
   - FacebookCore (0.9.0):
@@ -37,7 +37,7 @@ SPEC REPOS:
     - SimpleKeychain
 
 SPEC CHECKSUMS:
-  Auth0: b0e75f59f9ed7c2daa03146d5fe46445dea0d2f8
+  Auth0: 59bece5b578a93589bd321fafeed8a042429f9db
   FacebookCore: ba86524b66cfa86d0f8e65d08faa8504a9f732dd
   FacebookLogin: 6cee9fd6e1fe976fe8f7eec199e27b28b14f5d63
   FBSDKCoreKit: 1d5acf7c9d7a2f92bb1a242dc60cae5b7adb91df
@@ -47,4 +47,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 26dfe08b52dc5f2a0480cfc3a6120e98a63c7095
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.10.1
